@@ -126,6 +126,7 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, customerDetai
         <div className="container max-w-md mx-auto px-4">
           <div className="bg-card border rounded-lg p-8 text-center space-y-4">
             <h1 className="text-2xl font-bold text-amber-900">Complete Payment</h1>
+            <p>{razorpayLoaded}</p>
             {isLoading ? (
               <p className="text-muted-foreground">Preparing payment gateway...</p>
             ) : (
