@@ -56,6 +56,7 @@ export function CheckoutForm({ cart, totalPrice, userId, onBack, onClose }: Chec
         orderId={orderId}
         totalPrice={totalPrice}
         onSuccess={onClose}
+        onBack={onBack}
         customerDetails={{
           firstName: formData.firstName,
           lastName: formData.lastName,

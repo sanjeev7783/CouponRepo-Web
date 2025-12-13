@@ -43,7 +43,7 @@ export default async function ConfirmationPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center p-6">
-      <Card className="max-w-2xl w-full border-amber-200">
+        <Card className="max-w-2xl w-full border-amber-200">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <CheckCircle className="h-16 w-16 text-green-600" />
@@ -100,7 +100,7 @@ export default async function ConfirmationPage({
             </Link>
           </div>
         </CardContent>
-      </Card>
+        </Card>
     </div>
   )
 }

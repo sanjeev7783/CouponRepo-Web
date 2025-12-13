@@ -4,11 +4,13 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import Script from "next/script"
 import { getRazorpayKeyId } from "@/app/actions/razorpay-config"
+import { ArrowLeft } from "lucide-react"
 
 interface RazorpayCheckoutProps {
   orderId: string
   totalPrice: number
   onSuccess: () => void
+  onBack: () => void
   customerDetails: {
     firstName: string
     lastName: string
@@ -22,7 +24,7 @@ declare global {
   }
 }
 
-export function RazorpayCheckout({ orderId, totalPrice, onSuccess, customerDetails }: RazorpayCheckoutProps) {
+export function RazorpayCheckout({ orderId, totalPrice, onSuccess, onBack, customerDetails }: RazorpayCheckoutProps) {
   const [razorpayOrderId, setRazorpayOrderId] = useState<string | null>(null)
   const [razorpayKeyId, setRazorpayKeyId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -117,9 +119,14 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, customerDetai
         }}
       />
 
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-        <div className="container max-w-md mx-auto px-4">
-          <div className="bg-card border rounded-lg p-8 text-center space-y-4">
+      <div className="fixed inset-0 bg-background z-50 p-4">
+        <Button variant="ghost" onClick={onBack} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+        <div className="flex items-center justify-center h-full">
+          <div className="container max-w-md mx-auto">
+            <div className="bg-card border rounded-lg p-8 text-center space-y-4">
             <h1 className="text-2xl font-bold text-amber-900">Complete Payment</h1>
             {isLoading ? (
               <p className="text-muted-foreground">Preparing payment gateway...</p>
@@ -138,6 +145,7 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, customerDetai
                 )}
               </>
             )}
+            </div>
           </div>
         </div>
       </div>
