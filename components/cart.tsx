@@ -39,7 +39,7 @@ export function Cart({ cart, open, onClose, onUpdateQuantity, totalPrice, userId
           <SheetDescription>Review your selected coupons</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-8 flex flex-col h-full">
+        <div className="mt-8 flex flex-col h-full mx-3 mb-4">
           {cart.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">Your cart is empty</p>
           ) : (
