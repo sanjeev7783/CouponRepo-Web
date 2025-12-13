@@ -104,12 +104,7 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, customerDetai
     razorpay.open()
   }
 
-  useEffect(() => {
-    if (razorpayLoaded && !isLoading && razorpayOrderId && razorpayKeyId) {
-      // Auto-open payment modal when ready
-      handlePayment()
-    }
-  }, [razorpayLoaded, isLoading, razorpayOrderId, razorpayKeyId])
+
 
   return (
     <>
@@ -126,7 +121,6 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, customerDetai
         <div className="container max-w-md mx-auto px-4">
           <div className="bg-card border rounded-lg p-8 text-center space-y-4">
             <h1 className="text-2xl font-bold text-amber-900">Complete Payment</h1>
-            <p>{razorpayLoaded}</p>
             {isLoading ? (
               <p className="text-muted-foreground">Preparing payment gateway...</p>
             ) : (
@@ -135,10 +129,12 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, customerDetai
                   <p className="text-lg font-semibold">Amount: ₹{(totalPrice / 100).toFixed(2)}</p>
                   <p className="text-sm text-muted-foreground">Secure payment powered by Razorpay</p>
                 </div>
-                {razorpayLoaded && razorpayOrderId && razorpayKeyId && (
+                {razorpayOrderId && razorpayKeyId ? (
                   <Button onClick={handlePayment} className="w-full bg-amber-600 hover:bg-amber-700" size="lg">
                     Pay Now
                   </Button>
+                ) : (
+                  <p className="text-muted-foreground">Loading payment options...</p>
                 )}
               </>
             )}
