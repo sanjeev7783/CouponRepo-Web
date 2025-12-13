@@ -54,10 +54,6 @@ export function CouponList({ coupons, user }: CouponListProps) {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        <Button variant="ghost" onClick={() => window.history.back()} className="mb-4 text-amber-900">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold text-amber-900 mb-2">Welcome, {user.email?.split("@")[0]}!</h1>
