@@ -1,0 +1,105 @@
+"use client"
+
+import { useState } from "react"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
+import type { CartItem } from "@/lib/types"
+import { Plus, Minus, Trash2 } from "lucide-react"
+import { CheckoutForm } from "@/components/checkout-form"
+
+interface CartProps {
+  cart: CartItem[]
+  open: boolean
+  onClose: () => void
+  onUpdateQuantity: (couponId: string, delta: number) => void
+  totalPrice: number
+  userId: string
+}
+
+export function Cart({ cart, open, onClose, onUpdateQuantity, totalPrice, userId }: CartProps) {
+  const [showCheckout, setShowCheckout] = useState(false)
+
+  if (showCheckout) {
+    return (
+      <CheckoutForm
+        cart={cart}
+        totalPrice={totalPrice}
+        userId={userId}
+        onBack={() => setShowCheckout(false)}
+        onClose={onClose}
+      />
+    )
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onClose}>
+      <SheetContent className="w-full sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle>Your Cart</SheetTitle>
+          <SheetDescription>Review your selected coupons</SheetDescription>
+        </SheetHeader>
+
+        <div className="mt-8 flex flex-col gap-4">
+          {cart.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Your cart is empty</p>
+          ) : (
+            <>
+              <div className="flex flex-col gap-4 max-h-96 overflow-y-auto">
+                {cart.map((item) => (
+                  <div key={item.coupon.id} className="flex items-center gap-3 border rounded-lg p-3">
+                    <div className="w-16 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                      <img
+                        src={item.coupon.image_url || "/placeholder.svg"}
+                        alt={item.coupon.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-sm truncate">{item.coupon.name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        ₹{(item.coupon.price_in_cents / 100).toFixed(2)} × {item.quantity}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => onUpdateQuantity(item.coupon.id, -1)}
+                        className="h-8 w-8"
+                      >
+                        {item.quantity === 1 ? <Trash2 className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => onUpdateQuantity(item.coupon.id, 1)}
+                        className="h-8 w-8"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between text-lg font-semibold">
+                  <span>Total:</span>
+                  <span className="text-amber-700">₹{(totalPrice / 100).toFixed(2)}</span>
+                </div>
+              </div>
+
+              <Button
+                className="w-full bg-amber-600 hover:bg-amber-700"
+                size="lg"
+                onClick={() => setShowCheckout(true)}
+              >
+                Continue to Payment
+              </Button>
+            </>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
