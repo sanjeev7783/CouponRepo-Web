@@ -4,9 +4,10 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Plus, Minus, ArrowLeft } from "lucide-react"
+import { ShoppingCart, Plus, Minus, ArrowLeft, User } from "lucide-react"
 import type { Coupon, CartItem } from "@/lib/types"
 import { Cart } from "@/components/cart"
+import { ProfileDrawer } from "@/components/profile-drawer"
 import type { User } from "@supabase/supabase-js"
 
 interface CouponListProps {
@@ -17,6 +18,7 @@ interface CouponListProps {
 export function CouponList({ coupons, user }: CouponListProps) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [showCart, setShowCart] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
 
   const addToCart = (coupon: Coupon) => {
     setCart((prev) => {
@@ -61,13 +63,19 @@ export function CouponList({ coupons, user }: CouponListProps) {
             <h1 className="text-4xl font-bold text-amber-900 mb-2">Welcome, {user.email?.split("@")[0]}!</h1>
             <p className="text-lg text-amber-700">Select your temple coupons</p>
           </div>
-          <Button size="lg" className="bg-amber-600 hover:bg-amber-700 relative" onClick={() => setShowCart(true)}>
-            <ShoppingCart className="mr-2 h-5 w-5" />
-            Cart
-            {totalItems > 0 && (
-              <Badge className="absolute -top-2 -right-2 bg-orange-600 hover:bg-orange-700">{totalItems}</Badge>
-            )}
-          </Button>
+          <div className="flex gap-3">
+
+            <Button size="lg" className="bg-amber-600 hover:bg-amber-700 relative" onClick={() => setShowCart(true)}>
+              <ShoppingCart className="mr-2 h-5 w-5" />
+              Cart
+              {totalItems > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-orange-600 hover:bg-orange-700">{totalItems}</Badge>
+              )}
+            </Button>
+            <Button size="lg" variant="outline" className="border-amber-300" onClick={() => setShowProfile(true)}>
+              <User className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         {Object.entries(groupedCoupons).map(([category, coupons]) => (
@@ -134,6 +142,12 @@ export function CouponList({ coupons, user }: CouponListProps) {
         onUpdateQuantity={updateQuantity}
         totalPrice={totalPrice}
         userId={user.id}
+      />
+
+      <ProfileDrawer
+        user={user}
+        open={showProfile}
+        onClose={() => setShowProfile(false)}
       />
     </>
   )
