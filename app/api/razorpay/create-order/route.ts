@@ -12,6 +12,9 @@ export async function POST(request: Request) {
       notes: {
         orderId,
       },
+      ...(process.env.RAZORPAY_CHECKOUT_CONFIG_ID && {
+        checkout_config_id: process.env.RAZORPAY_CHECKOUT_CONFIG_ID,
+      }),
     })
 
     return NextResponse.json({
