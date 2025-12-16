@@ -39,9 +39,10 @@ export async function POST(request: Request) {
     // Create order items
     const orderItems = cart.map((item: any) => ({
       order_id: order.id,
-      coupon_id: item.coupon.id,
+      coupon_id: item.coupon?.id || null,
+      prashad_id: item.prashad?.id || null,
       quantity: item.quantity,
-      price_in_cents: item.coupon.price_in_cents,
+      price_in_cents: item.coupon?.price_in_cents || item.prashad?.price_in_cents || 0,
     }))
 
     const { error: itemsError } = await supabase.from("order_items").insert(orderItems)

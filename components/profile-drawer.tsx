@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { User, ShoppingBag, LogOut } from "lucide-react"
+import { User, ShoppingBag, LogOut, Shield } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
+import Link from "next/link"
 
 interface Order {
   id: string
@@ -35,6 +37,22 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
   const [showOrders, setShowOrders] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const supabase = createClient()
+
+  useEffect(() => {
+    checkAdminStatus()
+  }, [user.id])
+
+  const checkAdminStatus = async () => {
+    const { data } = await supabase
+      .from("admin_users")
+      .select("id")
+      .eq("id", user.id)
+      .single()
+
+    setIsAdmin(!!data)
+  }
 
   const fetchOrders = async () => {
     setLoading(true)
@@ -90,7 +108,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
                     <div className="space-y-1">
                       {order.order_items?.map((item) => (
                         <div key={item.id} className="flex justify-between text-sm">
-                          <span>{item.coupons.name} × {item.quantity}</span>
+                          <span>{item.coupons?.name || item.prashad?.name} × {item.quantity}</span>
                           <span>₹{((item.price_in_cents * item.quantity) / 100).toFixed(2)}</span>
                         </div>
                       ))}
@@ -113,7 +131,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
           <SheetDescription>Your account details</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-8 space-y-6">
+        <div className="mt-8 space-y-6 mx-3">
           <Card className="border-amber-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -139,6 +157,15 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
               <ShoppingBag className="mr-2 h-4 w-4" />
               {loading ? "Loading..." : "My Orders"}
             </Button>
+
+            {isAdmin && (
+              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
+                <Link href="/admin">
+                  <Shield className="mr-2 h-4 w-4" />
+                  Admin Portal
+                </Link>
+              </Button>
+            )}
 
             <Button
               onClick={handleLogout}

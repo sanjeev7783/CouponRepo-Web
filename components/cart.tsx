@@ -11,7 +11,7 @@ interface CartProps {
   cart: CartItem[]
   open: boolean
   onClose: () => void
-  onUpdateQuantity: (couponId: string, delta: number) => void
+  onUpdateQuantity: (itemId: string, delta: number, type?: 'coupon' | 'prashad') => void
   totalPrice: number
   userId: string
 }
@@ -36,7 +36,7 @@ export function Cart({ cart, open, onClose, onUpdateQuantity, totalPrice, userId
       <SheetContent className="w-full sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Your Cart</SheetTitle>
-          <SheetDescription>Review your selected coupons</SheetDescription>
+          <SheetDescription>Review your selected items</SheetDescription>
         </SheetHeader>
 
         <div className="mt-8 flex flex-col h-full mx-3 mb-4">
@@ -46,41 +46,54 @@ export function Cart({ cart, open, onClose, onUpdateQuantity, totalPrice, userId
             <>
               <div className="flex-1 overflow-y-scroll mb-4">
                 <div className="flex flex-col gap-4">
-                  {cart.map((item) => (
-                    <div key={item.coupon.id} className="flex items-center gap-3 border rounded-lg p-3">
-                      <div className="w-16 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
-                        <img
-                          src={item.coupon.image_url || "/placeholder.svg"}
-                          alt={item.coupon.name}
-                          className="w-full h-full object-cover"
-                        />
+                  {cart.map((item) => {
+                    const isProshad = !!item.prashad
+                    const itemData = item.coupon || item.prashad
+                    const itemId = itemData?.id || ''
+                    const itemName = itemData?.name || ''
+                    const itemImage = item.coupon?.image_url || item.prashad?.image_url
+                    const itemPrice = item.coupon?.price_in_cents || 0
+                    
+                    return (
+                      <div key={itemId} className="flex items-center gap-3 border rounded-lg p-3">
+                        <div className="w-16 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                          <img
+                            src={itemImage || "/placeholder.svg"}
+                            alt={itemName}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-sm truncate">{itemName}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {isProshad ? (
+                              `₹${((item.prashad?.price_in_cents || 0) / 100).toFixed(2)} × ${item.quantity}`
+                            ) : (
+                              `₹${(itemPrice / 100).toFixed(2)} × ${item.quantity}`
+                            )}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => onUpdateQuantity(itemId, -1, isProshad ? 'prashad' : 'coupon')}
+                            className="h-8 w-8"
+                          >
+                            {item.quantity === 1 ? <Trash2 className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => onUpdateQuantity(itemId, 1, isProshad ? 'prashad' : 'coupon')}
+                            className="h-8 w-8"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-sm truncate">{item.coupon.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          ₹{(item.coupon.price_in_cents / 100).toFixed(2)} × {item.quantity}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => onUpdateQuantity(item.coupon.id, -1)}
-                          className="h-8 w-8"
-                        >
-                          {item.quantity === 1 ? <Trash2 className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => onUpdateQuantity(item.coupon.id, 1)}
-                          className="h-8 w-8"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
 

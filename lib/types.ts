@@ -10,7 +10,8 @@ export interface Coupon {
 }
 
 export interface CartItem {
-  coupon: Coupon
+  coupon?: Coupon
+  prashad?: Prashad
   quantity: number
 }
 
@@ -34,5 +35,25 @@ export interface OrderItem {
   coupon_id: string
   quantity: number
   price_in_cents: number
+  created_at: string
+}
+
+export type MealTime = "breakfast" | "lunch" | "dinner"
+
+export interface Prashad {
+  id: string
+  name: string
+  description: string | null
+  meal_time: MealTime
+  image_url: string | null
+  price_in_cents: number
+  is_available: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminUser {
+  id: string
+  email: string
   created_at: string
 }

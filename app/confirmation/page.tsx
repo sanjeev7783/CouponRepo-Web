@@ -30,7 +30,8 @@ export default async function ConfirmationPage({
       *,
       order_items (
         *,
-        coupons:coupon_id (*)
+        coupons:coupon_id (*),
+        prashad:prashad_id (*)
       )
     `)
     .eq("id", params.orderId)
@@ -74,12 +75,12 @@ export default async function ConfirmationPage({
           </div>
 
           <div className="border rounded-lg p-4 bg-white">
-            <h3 className="font-semibold text-amber-900 mb-3">Coupons Purchased</h3>
+            <h3 className="font-semibold text-amber-900 mb-3">Items Purchased</h3>
             <div className="space-y-2">
               {order.order_items?.map((item: any) => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span>
-                    {item.coupons.name} × {item.quantity}
+                    {item.coupons?.name || item.prashad?.name} × {item.quantity}
                   </span>
                   <span className="font-medium">₹{((item.price_in_cents * item.quantity) / 100).toFixed(2)}</span>
                 </div>
