@@ -93,10 +93,22 @@ export function PrashadManager({ userEmail }: PrashadManagerProps) {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this prashad item?")) {
-      const { error } = await supabase.from("prashad").delete().eq("id", id)
-
+      console.log('Deleting prashad with id:', id)
+      
+      const { data, error } = await supabase.from("prashad").delete().eq("id", id)
+      
       if (!error) {
-        await loadPrashads()
+        // Successfully deleted
+        const updatedPrashads = prashads.filter(p => p.id !== id)
+        setPrashads(updatedPrashads)
+      } else {
+        // Handle foreign key constraint error
+        if (error.code === '23503') {
+          alert('Cannot delete this item because it has been ordered by customers. You can mark it as unavailable instead.')
+        } else {
+          console.error('Delete failed:', error)
+          alert('Failed to delete item: ' + error.message)
+        }
       }
     }
   }
@@ -115,7 +127,7 @@ export function PrashadManager({ userEmail }: PrashadManagerProps) {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    localStorage.removeItem('user')
     router.push("/auth/login")
   }
 

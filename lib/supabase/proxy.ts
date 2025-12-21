@@ -25,15 +25,16 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Remove Supabase auth check - using Resend-based auth instead
+  // const {
+  //   data: { user },
+  // } = await supabase.auth.getUser()
 
-  if (request.nextUrl.pathname.startsWith("/coupons") && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/auth/login"
-    return NextResponse.redirect(url)
-  }
+  // if (request.nextUrl.pathname.startsWith("/coupons") && !user) {
+  //   const url = request.nextUrl.clone()
+  //   url.pathname = "/auth/login"
+  //   return NextResponse.redirect(url)
+  // }
 
   return supabaseResponse
 }

@@ -1,22 +1,59 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { PrashadManager } from "@/components/prashad-manager"
+import { createClient } from "@/lib/supabase/client"
 
-export default async function AdminPage() {
-  const supabase = await createClient()
+interface User {
+  email: string
+  authenticated: boolean
+}
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
-  if (error || !user) {
-    redirect("/auth/login")
+export default function AdminPage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const supabase = createClient()
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Check localStorage for user
+      const userData = localStorage.getItem('user')
+      if (!userData) {
+        router.push('/auth/login')
+        return
+      }
+
+      const parsedUser = JSON.parse(userData)
+      setUser(parsedUser)
+
+      // Check if user is admin
+      const { data: adminUser } = await supabase
+        .from("admin_users")
+        .select("*")
+        .eq("email", parsedUser.email)
+      
+      setIsAdmin(!!(adminUser && adminUser.length > 0))
+      
+      setLoading(false)
+    }
+
+    checkAuth()
+  }, [router, supabase])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Loading...</h1>
+        </div>
+      </div>
+    )
   }
 
-  // Check if user is an admin
-  const { data: adminUser } = await supabase.from("admin_users").select("*").eq("id", user.id).single()
-
-  if (!adminUser) {
+  if (!user || !isAdmin) {
     return (
       <div className="flex min-h-svh items-center justify-center p-6">
         <div className="text-center">
@@ -29,7 +66,7 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-svh bg-background">
-      <PrashadManager userEmail={user.email || ""} />
+      <PrashadManager userEmail={user.email} />
     </div>
   )
 }

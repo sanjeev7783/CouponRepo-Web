@@ -2,7 +2,6 @@
 
 import type React from "react"
 
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,19 +19,19 @@ export default function LoginPage() {
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: true,
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/coupons`,
-        },
+      const response = await fetch('/api/auth/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       })
-      if (error) throw error
+      
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error)
+      
       setStep("otp")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
@@ -43,21 +42,36 @@ export default function LoginPage() {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: "email",
+      const response = await fetch('/api/auth/otp', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
       })
-      if (error) throw error
-      router.push("/coupons")
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error)
+      }
+      
+      // Store user session and ensure it's written
+      console.log('Setting user in localStorage:', data.user)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      console.log('User stored, checking:', localStorage.getItem('user'))
+      
+      // Small delay to ensure localStorage is written
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      console.log('Redirecting to coupons page')
+      // Force redirect
+      window.location.href = '/coupons'
+      
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
-    } finally {
       setIsLoading(false)
     }
   }

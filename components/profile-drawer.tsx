@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, ShoppingBag, LogOut, Shield } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import type { User as SupabaseUser } from "@supabase/supabase-js"
-import Link from "next/link"
 
 interface Order {
   id: string
@@ -27,8 +25,13 @@ interface Order {
   }[]
 }
 
+interface ResendUser {
+  email: string
+  authenticated: boolean
+}
+
 interface ProfileDrawerProps {
-  user: SupabaseUser
+  user: ResendUser
   open: boolean
   onClose: () => void
 }
@@ -42,16 +45,24 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
 
   useEffect(() => {
     checkAdminStatus()
-  }, [user.id])
+  }, [user.email])
 
   const checkAdminStatus = async () => {
-    const { data } = await supabase
-      .from("admin_users")
-      .select("id")
-      .eq("id", user.id)
-      .single()
+    console.log('Checking admin status for:', user.email)
+    
+    try {
+      const { data, error } = await supabase
+        .from("admin_users")
+        .select("*")
+        .eq("email", user.email)
 
-    setIsAdmin(!!data)
+      console.log('Admin check result:', data, 'Error:', error)
+      console.log('Setting isAdmin to:', !!(data && data.length > 0))
+      setIsAdmin(!!(data && data.length > 0))
+    } catch (err) {
+      console.error('Admin check failed:', err)
+      setIsAdmin(false)
+    }
   }
 
   const fetchOrders = async () => {
@@ -71,7 +82,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
   }
 
   const handleLogout = async () => {
-    await fetch("/auth/logout", { method: "POST" })
+    localStorage.removeItem('user')
     window.location.href = "/auth/login"
   }
 
@@ -142,8 +153,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
             <CardContent>
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium">Email:</span> {user.email}</p>
-                <p><span className="font-medium">User ID:</span> {user.id.slice(0, 8)}...</p>
-                <p><span className="font-medium">Joined:</span> {new Date(user.created_at).toLocaleDateString()}</p>
+                <p><span className="font-medium">Status:</span> {user.authenticated ? 'Authenticated' : 'Not Authenticated'}</p>
               </div>
             </CardContent>
           </Card>
@@ -160,10 +170,10 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
 
             {isAdmin && (
               <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
-                <Link href="/admin">
+                <a href="/admin">
                   <Shield className="mr-2 h-4 w-4" />
                   Admin Portal
-                </Link>
+                </a>
               </Button>
             )}
 
