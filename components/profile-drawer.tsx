@@ -68,11 +68,13 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
   const fetchOrders = async () => {
     setLoading(true)
     try {
-      const response = await fetch("/api/orders/user")
+      const response = await fetch(`/api/orders/user?email=${encodeURIComponent(user.email)}`)
       if (response.ok) {
         const data = await response.json()
         setOrders(data.orders)
         setShowOrders(true)
+      } else {
+        console.error('Failed to fetch orders:', response.status)
       }
     } catch (error) {
       console.error("Error fetching orders:", error)

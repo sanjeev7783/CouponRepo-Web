@@ -74,6 +74,7 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, onBack, custo
       },
       handler: async (response: any) => {
         try {
+          console.log('Payment successful, verifying...', response)
           const verifyResponse = await fetch("/api/razorpay/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -85,9 +86,13 @@ export function RazorpayCheckout({ orderId, totalPrice, onSuccess, onBack, custo
             }),
           })
 
+          console.log('Verification response status:', verifyResponse.status)
           if (verifyResponse.ok) {
+            console.log('Payment verified, redirecting to confirmation')
             window.location.href = `/confirmation?orderId=${orderId}`
           } else {
+            const errorData = await verifyResponse.json()
+            console.error('Verification failed:', errorData)
             alert("Payment verification failed. Please contact support.")
           }
         } catch (error) {

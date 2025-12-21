@@ -32,21 +32,28 @@ export function CheckoutForm({ cart, totalPrice, userId, onBack, onClose }: Chec
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const requestData = {
+      userId,
+      cart,
+      totalPrice,
+      ...formData,
+    }
+    
+    console.log('Sending request data:', requestData)
+
     const response = await fetch("/api/orders/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        cart,
-        totalPrice,
-        ...formData,
-      }),
+      body: JSON.stringify(requestData),
     })
 
     if (response.ok) {
       const { orderId } = await response.json()
       setOrderId(orderId)
       setShowPayment(true)
+    } else {
+      const error = await response.json()
+      console.error('API Error:', error)
     }
   }
 

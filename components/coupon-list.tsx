@@ -219,7 +219,7 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
         onClose={() => setShowCart(false)}
         onUpdateQuantity={updateQuantity}
         totalPrice={totalPrice}
-        userId={user.id}
+        userId={user.email}
       />
 
       <ProfileDrawer
