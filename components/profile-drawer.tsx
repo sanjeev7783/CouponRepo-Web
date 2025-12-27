@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, ShoppingBag, LogOut, Shield } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { AdminDropdown } from "@/components/admin-dropdown"
 
 interface Order {
   id: string
@@ -171,12 +172,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
             </Button>
 
             {isAdmin && (
-              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
-                <a href="/admin">
-                  <Shield className="mr-2 h-4 w-4" />
-                  Admin Portal
-                </a>
-              </Button>
+              <AdminDropdown userEmail={user.email} />
             )}
 
             <Button

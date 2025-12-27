@@ -78,7 +78,6 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
             <p className="text-lg text-amber-700">Select your temple coupons</p>
           </div>
           <div className="flex gap-3">
-
             <Button size="lg" className="bg-amber-600 hover:bg-amber-700 relative" onClick={() => setShowCart(true)}>
               <ShoppingCart className="mr-2 h-5 w-5" />
               Cart
