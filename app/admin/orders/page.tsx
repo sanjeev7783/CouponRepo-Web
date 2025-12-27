@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { ArrowLeft, Filter, X } from "lucide-react"
+import { ArrowLeft, Filter, X, Search } from "lucide-react"
 
 interface Order {
   id: string
@@ -24,6 +24,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>("")
+  const [searchQuery, setSearchQuery] = useState<string>("")
   const router = useRouter()
   const supabase = createClient()
 
@@ -85,24 +86,44 @@ export default function AdminOrdersPage() {
     checkAuthAndFetchOrders()
   }, [router, supabase])
 
+  const applyFilters = () => {
+    let filtered = orders
+    
+    // Apply date filter
+    if (selectedDate) {
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.created_at).toISOString().split('T')[0]
+        return orderDate === selectedDate
+      })
+    }
+    
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(order => 
+        order.id.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    
+    setFilteredOrders(filtered)
+  }
+
   const handleDateFilter = (date: string) => {
     setSelectedDate(date)
-    if (!date) {
-      setFilteredOrders(orders)
-      return
-    }
+  }
 
-    const filtered = orders.filter(order => {
-      const orderDate = new Date(order.created_at).toISOString().split('T')[0]
-      return orderDate === date
-    })
-    setFilteredOrders(filtered)
+  const handleSearchFilter = (query: string) => {
+    setSearchQuery(query)
   }
 
   const resetFilter = () => {
     setSelectedDate("")
-    setFilteredOrders(orders)
+    setSearchQuery("")
   }
+
+  // Apply filters whenever date or search changes
+  useEffect(() => {
+    applyFilters()
+  }, [selectedDate, searchQuery, orders])
 
   if (loading) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">Loading...</div>
@@ -124,9 +145,18 @@ export default function AdminOrdersPage() {
             <h1 className="text-4xl font-bold text-amber-900">User Orders Management</h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span>Show order by Date:</span>
+              <Search className="h-4 w-4 text-amber-700" />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchFilter(e.target.value)}
+                className="w-48"
+                placeholder="Search by Order ID"
+              />
+            </div>
+            <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-amber-700" />
               <Input
                 type="date"
@@ -136,7 +166,7 @@ export default function AdminOrdersPage() {
                 placeholder="Filter by date"
               />
             </div>
-            {selectedDate && (
+            {(selectedDate || searchQuery) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -152,7 +182,7 @@ export default function AdminOrdersPage() {
         <div className="grid gap-6">
           {filteredOrders.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">{selectedDate ? 'No orders found for selected date' : 'No orders found'}</p>
+              <p className="text-gray-500">{selectedDate || searchQuery ? 'No orders found for current filters' : 'No orders found'}</p>
             </div>
           ) : (
             filteredOrders.map((order) => (
