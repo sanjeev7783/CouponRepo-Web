@@ -145,7 +145,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
           <SheetDescription>Your account details</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-8 space-y-6 mx-3">
+        <div className="mt-8 space-y-6 mx-3 overflow-y-auto max-h-[calc(100vh-200px)]">
           <Card className="border-amber-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -161,7 +161,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
             </CardContent>
           </Card>
 
-          <div className="space-y-3">
+          <div className="space-y-3 pb-6">
             <Button
               onClick={fetchOrders}
               disabled={loading}
