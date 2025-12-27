@@ -7,6 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { ArrowLeft, Filter, X, Search } from "lucide-react"
 
 interface Order {
@@ -25,6 +36,8 @@ export default function AdminOrdersPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState<string>("")
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [pendingExpiry, setPendingExpiry] = useState<{ orderId: string, itemId: string } | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -88,7 +101,7 @@ export default function AdminOrdersPage() {
 
   const applyFilters = () => {
     let filtered = orders
-    
+
     // Apply date filter
     if (selectedDate) {
       filtered = filtered.filter(order => {
@@ -96,14 +109,14 @@ export default function AdminOrdersPage() {
         return orderDate === selectedDate
       })
     }
-    
+
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(order => 
+      filtered = filtered.filter(order =>
         order.id.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
-    
+
     setFilteredOrders(filtered)
   }
 
@@ -120,10 +133,66 @@ export default function AdminOrdersPage() {
     setSearchQuery("")
   }
 
-  // Apply filters whenever date or search changes
-  useEffect(() => {
-    applyFilters()
-  }, [selectedDate, searchQuery, orders])
+  const handleCouponExpiry = async (orderId: string, itemId: string, isExpired: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("order_items")
+        .update({ used: isExpired })
+        .eq("id", itemId)
+        .eq("order_id", orderId)
+
+      if (error) {
+        console.error('Error updating coupon expiry:', error)
+        return
+      }
+
+      // Update local state
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId
+            ? {
+              ...order,
+              order_items: order.order_items.map(item =>
+                item.id === itemId
+                  ? { ...item, used: isExpired }
+                  : item
+              )
+            }
+            : order
+        )
+      )
+
+      setFilteredOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId
+            ? {
+              ...order,
+              order_items: order.order_items.map(item =>
+                item.id === itemId
+                  ? { ...item, used: isExpired }
+                  : item
+              )
+            }
+            : order
+        )
+      )
+    } catch (error) {
+      console.error('Error updating coupon expiry:', error)
+    }
+  }
+
+  const confirmExpiry = () => {
+    if (pendingExpiry) {
+      handleCouponExpiry(pendingExpiry.orderId, pendingExpiry.itemId, true)
+      setShowConfirmDialog(false)
+      setPendingExpiry(null)
+    }
+  }
+
+  const cancelExpiry = () => {
+    setShowConfirmDialog(false)
+    setPendingExpiry(null)
+  }
 
   if (loading) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">Loading...</div>
@@ -197,9 +266,34 @@ export default function AdminOrdersPage() {
                         <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleString()}</p>
                       </div>
                     </div>
-                    <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
-                      {order.status}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-2">
+                      {/* <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
+                        {order.status}
+                      </Badge> */}
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={order.order_items?.every(item => item.used) ? 'default' : 'secondary'}
+                          className={order.order_items?.every(item => item.used) ? 'bg-[#b15300] text-white' : ''}
+                        >
+                          {order.order_items?.every(item => item.used) ? 'Coupon Expired' : 'Coupon Active'}
+                        </Badge>
+                        {!order.order_items?.every(item => item.used) ? (
+                          <Switch
+                            checked={true}
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                const validItem = order.order_items?.find(item => !item.used)
+                                if (validItem) {
+                                  setPendingExpiry({ orderId: order.id, itemId: validItem.id })
+                                  setShowConfirmDialog(true)
+                                }
+                              }
+                            }}
+                            className="data-[state=checked]:bg-green-500"
+                          />
+                        ) : null}
+                      </div>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -223,6 +317,23 @@ export default function AdminOrdersPage() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Coupon Expiry</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this coupon as expired? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelExpiry}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmExpiry} className="bg-red-600 hover:bg-red-700">
+              Yes, Mark as Expired
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
