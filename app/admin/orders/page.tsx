@@ -134,6 +134,11 @@ export default function AdminOrdersPage() {
     setSearchQuery("")
   }
 
+  // Apply filters whenever date or search changes
+  useEffect(() => {
+    applyFilters()
+  }, [selectedDate, searchQuery, orders])
+
   const handleCouponExpiry = async (orderId: string, itemId: string, isExpired: boolean) => {
     try {
       const { error } = await supabase
