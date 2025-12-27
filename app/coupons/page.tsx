@@ -15,7 +15,6 @@ export default function CouponsPage() {
   const [coupons, setCoupons] = useState<any[]>([])
   const [prashads, setPrashads] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [authChecked, setAuthChecked] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -24,16 +23,14 @@ export default function CouponsPage() {
       const userData = localStorage.getItem('user')
       console.log('User data from localStorage:', userData)
       
-      if (!userData) {
-        console.log('No user data, redirecting to login')
-        router.push('/auth/login')
-        return
+      if (userData) {
+        const parsedUser = JSON.parse(userData)
+        console.log('Parsed user:', parsedUser)
+        setUser(parsedUser)
+      } else {
+        // Create guest user
+        setUser({ email: 'guest@temple.com', authenticated: false })
       }
-
-      const parsedUser = JSON.parse(userData)
-      console.log('Parsed user:', parsedUser)
-      setUser(parsedUser)
-      setAuthChecked(true)
     }
 
     // Small delay to ensure localStorage is available
@@ -41,11 +38,9 @@ export default function CouponsPage() {
   }, [router])
 
   useEffect(() => {
-    if (!authChecked || !user) return
-
-    // Fetch data only after auth is confirmed
+    // Fetch data for both authenticated and guest users
     const fetchData = async () => {
-      console.log('Fetching data for authenticated user')
+      console.log('Fetching data')
       const supabase = createClient()
       
       const [couponsResult, prashadResult] = await Promise.all([
@@ -58,10 +53,12 @@ export default function CouponsPage() {
       setLoading(false)
     }
 
-    fetchData()
-  }, [authChecked, user])
+    if (user) {
+      fetchData()
+    }
+  }, [user])
 
-  if (!authChecked || loading) {
+  if (loading || !user) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">Loading...</div>
   }
 

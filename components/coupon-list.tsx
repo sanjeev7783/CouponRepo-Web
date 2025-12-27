@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Plus, Minus, ArrowLeft, User } from "lucide-react"
+import { ShoppingCart, Plus, Minus, ArrowLeft, User, LogIn } from "lucide-react"
 import type { Coupon, CartItem, Prashad } from "@/lib/types"
 import { Cart } from "@/components/cart"
 import { ProfileDrawer } from "@/components/profile-drawer"
@@ -74,8 +74,10 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-900 mb-2">Welcome, {user.email?.split("@")[0]}!</h1>
-            {/* <p className="text-base sm:text-lg text-amber-700">Select your temple coupons</p> */}
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-900 mb-2">
+              {user.authenticated ? `Welcome, ${user.email?.split("@")[0]}!` : "Welcome to Temple Coupons!"}
+            </h1>
+            <p className="text-base sm:text-lg text-amber-700">Select your temple coupons</p>
           </div>
           <div className="flex gap-3 w-full sm:w-auto">
             <Button size="lg" className="bg-amber-600 hover:bg-amber-700 relative flex-1 sm:flex-none" onClick={() => setShowCart(true)}>
@@ -87,9 +89,16 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
               </div>
               Cart
             </Button>
-            <Button size="lg" variant="outline" className="border-amber-300" onClick={() => setShowProfile(true)}>
-              <User className="h-5 w-5" />
-            </Button>
+            {user.authenticated ? (
+              <Button size="lg" variant="outline" className="border-amber-300" onClick={() => setShowProfile(true)}>
+                <User className="h-5 w-5" />
+              </Button>
+            ) : (
+              <Button size="lg" variant="outline" className="border-amber-300" onClick={() => window.location.href = '/auth/login'}>
+                <LogIn className="h-5 w-5 mr-2" />
+                Login
+              </Button>
+            )}
           </div>
         </div>
 
@@ -223,11 +232,13 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
         userId={user.email}
       />
 
-      <ProfileDrawer
-        user={user}
-        open={showProfile}
-        onClose={() => setShowProfile(false)}
-      />
+      {user.authenticated && (
+        <ProfileDrawer
+          user={user}
+          open={showProfile}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
     </>
   )
 }

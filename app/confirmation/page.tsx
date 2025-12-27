@@ -31,24 +31,23 @@ function ConfirmationContent() {
 
   useEffect(() => {
     if (!mounted) return
-    
+
     console.log('Confirmation page loaded, orderId:', orderId)
     const checkAuthAndFetchOrder = async () => {
       // Check if we're in the browser before accessing localStorage
       if (typeof window === 'undefined') return
-      
+
       // Check custom authentication
       const userData = localStorage.getItem('user')
       console.log('User data from localStorage:', userData)
       if (!userData) {
-        console.log('No user data, redirecting to login')
-        router.push('/auth/login')
-        return
+        // Create guest user for confirmation page
+        setUser({ email: 'guest@temple.com', authenticated: false })
+      } else {
+        const parsedUser = JSON.parse(userData)
+        console.log('Parsed user:', parsedUser)
+        setUser(parsedUser)
       }
-
-      const parsedUser = JSON.parse(userData)
-      console.log('Parsed user:', parsedUser)
-      setUser(parsedUser)
 
       if (!orderId) {
         console.log('No orderId, redirecting to coupons')
@@ -60,17 +59,23 @@ function ConfirmationContent() {
       try {
         console.log('Fetching order details for:', orderId)
         const supabase = createClient()
-        
-        // First, fetch the order
-        const { data: orderData, error: orderError } = await supabase
+
+        // First, fetch the order - for guests, don't filter by user_email
+        const orderQuery = supabase
           .from("orders")
           .select('*')
           .eq("id", orderId)
-          .eq("user_email", parsedUser.email)
-          .single()
+
+        // Only filter by user_email for authenticated users
+        const currentUser = userData ? JSON.parse(userData) : { email: 'guest@temple.com', authenticated: false }
+        if (currentUser.authenticated && currentUser.email !== 'guest@temple.com') {
+          orderQuery.eq("user_email", currentUser.email)
+        }
+
+        const { data: orderData, error: orderError } = await orderQuery.single()
 
         console.log('Order fetch result:', { orderData, error: orderError })
-        
+
         if (!orderData) {
           console.log('No order found, redirecting to coupons')
           router.push('/coupons')
@@ -143,7 +148,7 @@ function ConfirmationContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center p-6">
-        <Card className="max-w-2xl w-full border-amber-200">
+      <Card className="max-w-2xl w-full border-amber-200">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <CheckCircle className="h-16 w-16 text-green-600" />
@@ -164,9 +169,7 @@ function ConfirmationContent() {
               <p>
                 <span className="font-medium">Contact:</span> {order.contact}
               </p>
-              <p>
-                <span className="font-medium">Address:</span> {order.address}
-              </p>
+
               <p>
                 <span className="font-medium">Date:</span> {new Date(order.created_at).toLocaleDateString()}
               </p>
@@ -193,6 +196,7 @@ function ConfirmationContent() {
 
           <div className="text-center space-y-3">
             <p className="text-sm text-muted-foreground">
+              Kindly Show the <strong>OrderID</strong> at the temple entrance.<br></br>
               You will receive a confirmation email shortly with your coupon details.
             </p>
             <Link href="/coupons">
@@ -200,7 +204,7 @@ function ConfirmationContent() {
             </Link>
           </div>
         </CardContent>
-        </Card>
+      </Card>
     </div>
   )
 }

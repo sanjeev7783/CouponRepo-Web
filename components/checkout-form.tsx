@@ -38,14 +38,16 @@ export function CheckoutForm({ cart, totalPrice, userId, onBack, onClose }: Chec
     const userData = localStorage.getItem('user')
     if (userData) {
       const user = JSON.parse(userData)
-      const email = user.email || ''
-      const nameParts = email.split('@')[0].split('.')
+      if (user.authenticated && user.email !== 'guest@temple.com') {
+        const email = user.email || ''
+        const nameParts = email.split('@')[0].split('.')
 
-      setFormData(prev => ({
-        ...prev,
-        firstName: nameParts[0] || '',
-        lastName: nameParts[1] || ''
-      }))
+        setFormData(prev => ({
+          ...prev,
+          firstName: nameParts[0] || '',
+          lastName: nameParts[1] || ''
+        }))
+      }
     }
   }, [])
 
