@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Plus, Minus, ArrowLeft, User, LogIn } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ShoppingCart, Plus, Minus, ArrowLeft, User, LogIn, Search, Filter, X } from "lucide-react"
 import type { Coupon, CartItem, Prashad } from "@/lib/types"
 import { Cart } from "@/components/cart"
 import { ProfileDrawer } from "@/components/profile-drawer"
@@ -21,6 +23,9 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [showCart, setShowCart] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [mealTimeFilter, setMealTimeFilter] = useState<string>("")
+  const [filteredPrashads, setFilteredPrashads] = useState<Prashad[]>(prashads)
 
   const addToCart = (coupon: Coupon) => {
     setCart((prev) => {
@@ -69,6 +74,33 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
     {} as Record<string, Coupon[]>,
   )
 
+  // Filter prashads based on search and meal time
+  const applyFilters = () => {
+    let filtered = prashads
+
+    if (searchQuery) {
+      filtered = filtered.filter(prashad =>
+        prashad.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    if (mealTimeFilter) {
+      filtered = filtered.filter(prashad => prashad.meal_time === mealTimeFilter)
+    }
+
+    setFilteredPrashads(filtered)
+  }
+
+  // Apply filters when dependencies change
+  React.useEffect(() => {
+    applyFilters()
+  }, [searchQuery, mealTimeFilter, prashads])
+
+  const resetFilters = () => {
+    setSearchQuery("")
+    setMealTimeFilter("")
+  }
+
   return (
     <>
       <div className="container mx-auto px-4 py-8">
@@ -104,9 +136,57 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
 
         {prashads.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-amber-900 mb-4">Temple Prashad</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h2 className="text-2xl font-bold text-amber-900">Temple Prashad</h2>
+              
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-amber-700" />
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full sm:w-48 pr-8"
+                      placeholder="Search by Name"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-amber-700" />
+                  <Select value={mealTimeFilter} onValueChange={setMealTimeFilter}>
+                    <SelectTrigger className="w-full sm:w-40">
+                      <SelectValue placeholder="Filter by meal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="breakfast">Breakfast</SelectItem>
+                      <SelectItem value="lunch">Lunch</SelectItem>
+                      <SelectItem value="dinner">Dinner</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {(searchQuery || mealTimeFilter) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="border-red-200 text-red-600 hover:bg-red-50 w-full sm:w-auto"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {prashads.map((prashad) => {
+              {filteredPrashads.map((prashad) => {
                 const cartItem = cart.find((item) => item.prashad?.id === prashad.id)
                 return (
                   <Card key={prashad.id} className="border-amber-200 hover:shadow-lg transition-shadow">
@@ -129,8 +209,10 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
                       <CardDescription>{prashad.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-2xl font-bold text-amber-700 mb-2">₹{((prashad.price_in_cents || 0) / 100).toFixed(2)}</p>
-                      <Badge variant="default">Available</Badge>
+                      <div className="flex justify-between items-center">
+                        <p className="text-2xl font-bold text-amber-700">₹{((prashad.price_in_cents || 0) / 100).toFixed(2)}</p>
+                        <Badge variant="default">Available</Badge>
+                      </div>
                     </CardContent>
                     <CardFooter>
                       {cartItem ? (
