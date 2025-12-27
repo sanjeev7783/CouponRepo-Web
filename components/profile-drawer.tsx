@@ -86,7 +86,7 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
 
   const handleLogout = async () => {
     localStorage.removeItem('user')
-    window.location.href = "/auth/login"
+    window.location.href = "/coupons"
   }
 
   if (showOrders) {
