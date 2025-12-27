@@ -213,25 +213,35 @@ export default function AdminOrdersPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <Button variant="outline" onClick={() => router.back()}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <h1 className="text-4xl font-bold text-amber-900">User Orders Management</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-900">User Orders Management</h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-amber-700" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearchFilter(e.target.value)}
-                className="w-48"
-                placeholder="Search by Order ID"
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchFilter(e.target.value)}
+                  className="w-full sm:w-48 pr-8"
+                  placeholder="Search by Order ID"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-amber-700" />
@@ -239,7 +249,7 @@ export default function AdminOrdersPage() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => handleDateFilter(e.target.value)}
-                className="w-40"
+                className="w-full sm:w-40"
                 placeholder="Filter by date"
               />
             </div>
@@ -248,7 +258,7 @@ export default function AdminOrdersPage() {
                 variant="outline"
                 size="sm"
                 onClick={resetFilter}
-                className="border-red-200 text-red-600 hover:bg-red-50"
+                className="border-red-200 text-red-600 hover:bg-red-50 w-full sm:w-auto"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -279,7 +289,7 @@ export default function AdminOrdersPage() {
                         {order.status}
                       </Badge> */}
                       <div className="flex items-center gap-2">
-                        <Badge 
+                        <Badge
                           variant={order.order_items?.every(item => item.used) ? 'default' : 'secondary'}
                           className={order.order_items?.every(item => item.used) ? 'bg-[#b15300] text-white' : ''}
                         >
@@ -326,29 +336,41 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Coupon Expiry</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to mark this coupon as expired? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelExpiry} disabled={isUpdating}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmExpiry} className="bg-red-600 hover:bg-red-700" disabled={isUpdating}>
-              {isUpdating ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Updating...
-                </div>
-              ) : (
-                "Yes, Mark as Expired"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {showConfirmDialog && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md sm:max-w-lg">
+            <div className="p-6 space-y-3">
+              <h2 className="text-lg sm:text-xl font-semibold">Confirm Coupon Expiry</h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                Are you sure you want to mark this coupon as expired? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:justify-around gap-2 sm:gap-0 p-6 pt-0">
+              <button
+                onClick={cancelExpiry}
+                disabled={isUpdating}
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmExpiry}
+                disabled={isUpdating}
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 sm:ml-2"
+              >
+                {isUpdating ? (
+                  <div className="flex items-center gap-2 justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Updating...
+                  </div>
+                ) : (
+                  "Yes, Mark as Expired"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
