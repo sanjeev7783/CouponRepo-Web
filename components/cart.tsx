@@ -53,7 +53,7 @@ export function Cart({ cart, open, onClose, onUpdateQuantity, totalPrice, userId
                     const itemName = itemData?.name || ''
                     const itemImage = item.coupon?.image_url || item.prashad?.image_url
                     const itemPrice = item.coupon?.price_in_cents || 0
-                    
+
                     return (
                       <div key={itemId} className="flex items-center gap-3 border rounded-lg p-3">
                         <div className="w-16 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
@@ -107,8 +107,7 @@ export function Cart({ cart, open, onClose, onUpdateQuantity, totalPrice, userId
                   size="lg"
                   onClick={() => setShowCheckout(true)}
                 >
-                  Continue to Payment
-                </Button>
+                  Continue
               </div>
             </>
           )}

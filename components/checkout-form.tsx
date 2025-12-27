@@ -38,7 +38,7 @@ export function CheckoutForm({ cart, totalPrice, userId, onBack, onClose }: Chec
       totalPrice,
       ...formData,
     }
-    
+
     console.log('Sending request data:', requestData)
 
     const response = await fetch("/api/orders/create", {
@@ -125,7 +125,7 @@ export function CheckoutForm({ cart, totalPrice, userId, onBack, onClose }: Chec
                   <span className="text-amber-700">₹{(totalPrice / 100).toFixed(2)}</span>
                 </div>
                 <Button type="submit" className="w-full bg-amber-600 hover:bg-amber-700" size="lg">
-                  Checkout
+                  Place Order
                 </Button>
               </div>
             </form>
