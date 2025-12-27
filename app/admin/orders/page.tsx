@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { ArrowLeft, Filter, X } from "lucide-react"
 
 interface Order {
   id: string
@@ -19,8 +20,10 @@ interface Order {
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string>("")
   const router = useRouter()
   const supabase = createClient()
 
@@ -73,6 +76,7 @@ export default function AdminOrdersPage() {
         )
 
         setOrders(ordersWithItems)
+        setFilteredOrders(ordersWithItems)
       }
 
       setLoading(false)
@@ -80,6 +84,25 @@ export default function AdminOrdersPage() {
 
     checkAuthAndFetchOrders()
   }, [router, supabase])
+
+  const handleDateFilter = (date: string) => {
+    setSelectedDate(date)
+    if (!date) {
+      setFilteredOrders(orders)
+      return
+    }
+
+    const filtered = orders.filter(order => {
+      const orderDate = new Date(order.created_at).toISOString().split('T')[0]
+      return orderDate === date
+    })
+    setFilteredOrders(filtered)
+  }
+
+  const resetFilter = () => {
+    setSelectedDate("")
+    setFilteredOrders(orders)
+  }
 
   if (loading) {
     return <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">Loading...</div>
@@ -92,21 +115,47 @@ export default function AdminOrdersPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-4xl font-bold text-amber-900">User Orders Management</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={() => router.back()}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <h1 className="text-4xl font-bold text-amber-900">User Orders Management</h1>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span>Show order by Date:</span>
+              <Filter className="h-4 w-4 text-amber-700" />
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => handleDateFilter(e.target.value)}
+                className="w-40"
+                placeholder="Filter by date"
+              />
+            </div>
+            {selectedDate && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetFilter}
+                className="border-red-200 text-red-600 hover:bg-red-50"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-6">
-          {orders.length === 0 ? (
+          {filteredOrders.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">No orders found</p>
+              <p className="text-gray-500">{selectedDate ? 'No orders found for selected date' : 'No orders found'}</p>
             </div>
           ) : (
-            orders.map((order) => (
+            filteredOrders.map((order) => (
               <Card key={order.id} className="border-amber-200">
                 <CardHeader>
                   <div className="flex justify-between items-start">
