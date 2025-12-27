@@ -108,6 +108,7 @@ export function Cart({ cart, open, onClose, onUpdateQuantity, totalPrice, userId
                   onClick={() => setShowCheckout(true)}
                 >
                   Continue
+                </Button>
               </div>
             </>
           )}
