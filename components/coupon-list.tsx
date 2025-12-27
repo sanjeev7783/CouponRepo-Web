@@ -72,18 +72,20 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-amber-900 mb-2">Welcome, {user.email?.split("@")[0]}!</h1>
-            <p className="text-lg text-amber-700">Select your temple coupons</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-900 mb-2">Welcome, {user.email?.split("@")[0]}!</h1>
+            {/* <p className="text-base sm:text-lg text-amber-700">Select your temple coupons</p> */}
           </div>
-          <div className="flex gap-3">
-            <Button size="lg" className="bg-amber-600 hover:bg-amber-700 relative" onClick={() => setShowCart(true)}>
-              <ShoppingCart className="mr-2 h-5 w-5" />
+          <div className="flex gap-3 w-full sm:w-auto">
+            <Button size="lg" className="bg-amber-600 hover:bg-amber-700 relative flex-1 sm:flex-none" onClick={() => setShowCart(true)}>
+              <div className="relative mr-2">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-1 bg-orange-600 text-white text-xs rounded-full min-w-[16px] h-4 flex items-center justify-center">{totalItems}</span>
+                )}
+              </div>
               Cart
-              {totalItems > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-orange-600 hover:bg-orange-700">{totalItems}</Badge>
-              )}
             </Button>
             <Button size="lg" variant="outline" className="border-amber-300" onClick={() => setShowProfile(true)}>
               <User className="h-5 w-5" />
