@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Settings, Users, UserCog, QrCode, ChefHat, ChevronDown } from "lucide-react"
+import { Settings, Users, UserCog, ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface AdminDropdownProps {
@@ -23,9 +23,6 @@ export function AdminDropdown({ userEmail }: AdminDropdownProps) {
         break
       case "profile":
         router.push("/admin/profile")
-        break
-      case "qr-scan":
-        router.push("/admin/qr-scan")
         break
     }
     setIsOpen(false)
@@ -48,7 +45,7 @@ export function AdminDropdown({ userEmail }: AdminDropdownProps) {
             onClick={() => handleMenuClick("prashad")}
             className="hover:bg-blue-50 cursor-pointer px-4 py-3 flex items-center border-b border-gray-100 last:border-b-0"
           >
-            <ChefHat className="mr-3 h-4 w-4 text-blue-600" />
+            <Settings className="mr-3 h-4 w-4 text-blue-600" />
             <span className="font-medium">Prasad Management</span>
           </div>
           <div 
@@ -60,17 +57,10 @@ export function AdminDropdown({ userEmail }: AdminDropdownProps) {
           </div>
           <div 
             onClick={() => handleMenuClick("profile")}
-            className="hover:bg-blue-50 cursor-pointer px-4 py-3 flex items-center border-b border-gray-100 last:border-b-0"
+            className="hover:bg-blue-50 cursor-pointer px-4 py-3 flex items-center"
           >
             <UserCog className="mr-3 h-4 w-4 text-blue-600" />
             <span className="font-medium">Admin Profile Settings</span>
-          </div>
-          <div 
-            onClick={() => handleMenuClick("qr-scan")}
-            className="hover:bg-blue-50 cursor-pointer px-4 py-3 flex items-center"
-          >
-            <QrCode className="mr-3 h-4 w-4 text-blue-600" />
-            <span className="font-medium">QR Code Scan & Validity</span>
           </div>
         </div>
       )}
