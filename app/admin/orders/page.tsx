@@ -38,6 +38,7 @@ export default function AdminOrdersPage() {
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [pendingExpiry, setPendingExpiry] = useState<{ orderId: string, itemId: string } | null>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -181,9 +182,11 @@ export default function AdminOrdersPage() {
     }
   }
 
-  const confirmExpiry = () => {
+  const confirmExpiry = async () => {
     if (pendingExpiry) {
-      handleCouponExpiry(pendingExpiry.orderId, pendingExpiry.itemId, true)
+      setIsUpdating(true)
+      await handleCouponExpiry(pendingExpiry.orderId, pendingExpiry.itemId, true)
+      setIsUpdating(false)
       setShowConfirmDialog(false)
       setPendingExpiry(null)
     }
@@ -327,9 +330,16 @@ export default function AdminOrdersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelExpiry}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmExpiry} className="bg-red-600 hover:bg-red-700">
-              Yes, Mark as Expired
+            <AlertDialogCancel onClick={cancelExpiry} disabled={isUpdating}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmExpiry} className="bg-red-600 hover:bg-red-700" disabled={isUpdating}>
+              {isUpdating ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Updating...
+                </div>
+              ) : (
+                "Yes, Mark as Expired"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

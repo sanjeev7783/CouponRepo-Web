@@ -49,8 +49,8 @@ export function CheckoutForm({ cart, totalPrice, userId, onBack, onClose }: Chec
 
     if (response.ok) {
       const { orderId } = await response.json()
-      setOrderId(orderId)
-      setShowPayment(true)
+      // Skip payment and go directly to confirmation
+      window.location.href = `/confirmation?orderId=${orderId}`
     } else {
       const error = await response.json()
       console.error('API Error:', error)
@@ -58,19 +58,8 @@ export function CheckoutForm({ cart, totalPrice, userId, onBack, onClose }: Chec
   }
 
   if (showPayment && orderId) {
-    return (
-      <RazorpayCheckout
-        orderId={orderId}
-        totalPrice={totalPrice}
-        onSuccess={onClose}
-        onBack={onBack}
-        customerDetails={{
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          contact: formData.contact,
-        }}
-      />
-    )
+    // This block is now unused since we skip payment
+    return null
   }
 
   return (
