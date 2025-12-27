@@ -166,7 +166,7 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
           </div>
         )}
 
-        {Object.entries(groupedCoupons).map(([category, coupons]) => (
+        {/* {Object.entries(groupedCoupons).map(([category, coupons]) => (
           <div key={category} className="mb-12">
             <h2 className="text-2xl font-bold text-amber-900 mb-4">{category}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -220,7 +220,7 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
               })}
             </div>
           </div>
-        ))}
+        ))} */}
       </div>
 
       <Cart
