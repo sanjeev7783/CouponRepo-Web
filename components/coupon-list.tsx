@@ -107,7 +107,7 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-900 mb-2">
-              { "Welcome to Temple Coupons!"}
+              {user.authenticated ? `Welcome, ${user.email?.split("@")[0]}!` : "Welcome to Temple Coupons!"}
             </h1>
             <p className="text-base sm:text-lg text-amber-700">Select your temple coupons</p>
           </div>
@@ -138,7 +138,7 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
           <div className="mb-12">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <h2 className="text-2xl font-bold text-amber-900">Temple Prashad</h2>
-              
+
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Search className="h-4 w-4 text-amber-700" />
