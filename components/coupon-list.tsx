@@ -10,8 +10,13 @@ import { ShoppingCart, Plus, Minus, ArrowLeft, User, LogIn, Search, Filter, X } 
 import type { Coupon, CartItem, Prashad } from "@/lib/types"
 import { Cart } from "@/components/cart"
 import { ProfileDrawer } from "@/components/profile-drawer"
-import type { User } from "@supabase/supabase-js"
+import type { User as SupabaseUser } from "@supabase/supabase-js"
 import Image from "next/image"
+
+interface User {
+  authenticated: boolean
+  email?: string
+}
 
 interface CouponListProps {
   coupons: Coupon[]
@@ -107,7 +112,7 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-amber-900 mb-2">
-              { "Welcome to Temple Coupons!"}
+              Welcome to Temple Coupons!
             </h1>
             <p className="text-base sm:text-lg text-amber-700">Select your temple coupons</p>
           </div>
@@ -311,12 +316,12 @@ export function CouponList({ coupons, prashads, user }: CouponListProps) {
         onClose={() => setShowCart(false)}
         onUpdateQuantity={updateQuantity}
         totalPrice={totalPrice}
-        userId={user.email}
+        userId={user.email || ""}
       />
 
-      {user.authenticated && (
+      {user.authenticated && user.email && (
         <ProfileDrawer
-          user={user}
+          user={{ ...user, email: user.email }}
           open={showProfile}
           onClose={() => setShowProfile(false)}
         />

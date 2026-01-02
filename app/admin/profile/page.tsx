@@ -59,17 +59,37 @@ export default function AdminProfilePage() {
   const handleSave = async () => {
     if (!profile) return
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(profile.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setSaving(true)
     try {
       const { error } = await supabase
         .from("admin_users")
         .update({
+          email: profile.email,
           name: profile.name,
           phone_number: profile.phone_number
         })
         .eq("id", profile.id)
 
       if (error) throw error
+
+      // Update localStorage if email changed
+      const userData = localStorage.getItem('user')
+      if (userData) {
+        const parsedUser = JSON.parse(userData)
+        parsedUser.email = profile.email
+        localStorage.setItem('user', JSON.stringify(parsedUser))
+      }
 
       toast({
         title: "Profile Updated",
@@ -114,9 +134,10 @@ export default function AdminProfilePage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                type="email"
                 value={profile.email}
-                disabled
-                className="bg-gray-100"
+                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                placeholder="Enter your email"
               />
             </div>
             

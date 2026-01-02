@@ -8,6 +8,8 @@ import { User, ShoppingBag, LogOut, Shield } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { AdminDropdown } from "@/components/admin-dropdown"
 
+import { isAuthorizedAdmin } from "@/lib/admin-config"
+
 interface Order {
   id: string
   first_name: string
@@ -49,7 +51,11 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
   }, [user.email])
 
   const checkAdminStatus = async () => {
-    console.log('Checking admin status for:', user.email)
+    // Only allow authorized admin users
+    if (!isAuthorizedAdmin(user.email)) {
+      setIsAdmin(false)
+      return
+    }
     
     try {
       const { data, error } = await supabase
@@ -57,8 +63,6 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
         .select("*")
         .eq("email", user.email)
 
-      console.log('Admin check result:', data, 'Error:', error)
-      console.log('Setting isAdmin to:', !!(data && data.length > 0))
       setIsAdmin(!!(data && data.length > 0))
     } catch (err) {
       console.error('Admin check failed:', err)
@@ -155,7 +159,6 @@ export function ProfileDrawer({ user, open, onClose }: ProfileDrawerProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
-                <p><span className="font-medium">Email:</span> {user.email}</p>
                 <p><span className="font-medium">Status:</span> {user.authenticated ? 'Authenticated' : 'Not Authenticated'}</p>
               </div>
             </CardContent>

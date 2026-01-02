@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { PrashadManager } from "@/components/prashad-manager"
 import { createClient } from "@/lib/supabase/client"
+import { isAuthorizedAdmin } from "@/lib/admin-config"
 
 interface User {
   email: string
@@ -29,7 +30,14 @@ export default function AdminPage() {
       const parsedUser = JSON.parse(userData)
       setUser(parsedUser)
 
-      // Check if user is admin
+      // Only allow authorized admin users
+      if (!isAuthorizedAdmin(parsedUser.email)) {
+        setIsAdmin(false)
+        setLoading(false)
+        return
+      }
+
+      // Check if user is admin in database
       const { data: adminUser } = await supabase
         .from("admin_users")
         .select("*")
